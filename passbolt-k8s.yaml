@@ -1,0 +1,185 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: passbolt
+
+---
+
+# MariaDB Persistent Volume Claim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mariadb-pvc
+  namespace: passbolt
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+
+# GPG Volume Claim for Passbolt
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: passbolt-gpg-pvc
+  namespace: passbolt
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+
+# JWT Volume Claim for Passbolt
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: passbolt-jwt-pvc
+  namespace: passbolt
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+
+# MariaDB Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mariadb
+  namespace: passbolt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mariadb
+  template:
+    metadata:
+      labels:
+        app: mariadb
+    spec:
+      containers:
+      - name: mariadb
+        image: mariadb:10.11
+        env:
+        - name: MYSQL_RANDOM_ROOT_PASSWORD
+          value: "true"
+        - name: MYSQL_DATABASE
+          value: "passbolt"
+        - name: MYSQL_USER
+          value: "passbolt"
+        - name: MYSQL_PASSWORD
+          value: "P4ssb0lt"
+        volumeMounts:
+        - name: mariadb-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mariadb-storage
+        persistentVolumeClaim:
+          claimName: mariadb-pvc
+
+---
+
+# MariaDB Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb
+  namespace: passbolt
+spec:
+  ports:
+  - port: 3306
+    targetPort: 3306
+  selector:
+    app: mariadb
+  clusterIP: None # Use a headless service for database
+
+---
+
+# Passbolt Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: passbolt
+  namespace: passbolt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: passbolt
+  template:
+    metadata:
+      labels:
+        app: passbolt
+    spec:
+      containers:
+      - name: passbolt
+        image: passbolt/passbolt:latest-ce
+        env:
+        - name: APP_FULL_BASE_URL
+          value: "https://passbolt.local:30443"
+        - name: DATASOURCES_DEFAULT_HOST
+          value: "mariadb"
+        - name: DATASOURCES_DEFAULT_USERNAME
+          value: "passbolt"
+        - name: DATASOURCES_DEFAULT_PASSWORD
+          value: "P4ssb0lt"
+        - name: DATASOURCES_DEFAULT_DATABASE
+          value: "passbolt"
+        - name: EMAIL_TRANSPORT_DEFAULT_HOST
+          value: "smtp.fastmail.com"
+        - name: EMAIL_TRANSPORT_DEFAULT_PORT
+          value: "587"
+        - name: EMAIL_TRANSPORT_DEFAULT_USERNAME
+          value: "tallgareth@fea.st"
+        - name: EMAIL_TRANSPORT_DEFAULT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: fastmail-smtp
+              key: EMAIL_TRANSPORT_DEFAULT_PASSWORD
+        - name: EMAIL_TRANSPORT_DEFAULT_TLS
+          value: "true"
+        - name: EMAIL_DEFAULT_FROM
+          value: "tallgareth@fea.st"
+        volumeMounts:
+        - name: gpg-volume
+          mountPath: /etc/passbolt/gpg
+        - name: jwt-volume
+          mountPath: /etc/passbolt/jwt
+      volumes:
+      - name: gpg-volume
+        persistentVolumeClaim:
+          claimName: passbolt-gpg-pvc
+      - name: jwt-volume
+        persistentVolumeClaim:
+          claimName: passbolt-jwt-pvc
+
+---
+# Passbolt Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: passbolt
+  namespace: passbolt
+spec:
+  type: NodePort
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    nodePort: 30080
+  - name: https
+    port: 443
+    targetPort: 443
+    nodePort: 30443
+  selector:
+    app: passbolt
+
