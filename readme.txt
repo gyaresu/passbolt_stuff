@@ -1,4 +1,4 @@
-Test repo for playing with Docker/k8s Passbolt installs.
+# Test repo for playing with Docker/k8s Passbolt installs.
 
 Docker very straight forward.
 I've installed docker, docker-compose, helm and colima via Homebrew
@@ -21,7 +21,7 @@ Enhancement: https://github.com/passbolt/passbolt_browser_extension/issues?q=sta
 
 “Or switch to another account.” > replaced with link to a help page as you can't switch?
 
-kubectl exec -it passbolt-69bcfd8fc8-h57rw -n passbolt -- su -c "bin/cake passbolt register_user -u me@example.com -f ‘Gareth’ -l ‘.’ -r admin" -s /bin/bash www-data
+kubectl exec -it passbolt-depl-srv-7dc749fcc5-88gdx -n passbolt -- su -c "bin/cake passbolt register_user -u me@example.com -f ‘Gareth’ -l ‘.’ -r admin" -s /bin/bash www-data
 
 Docker image: https://hub.docker.com/r/passbolt/passbolt/
 
@@ -30,32 +30,18 @@ kubectl create secret generic fastmail-smtp \
   -n passbolt \
   --from-literal=EMAIL_TRANSPORT_DEFAULT_PASSWORD=<app_password>
 
+```
 #!/bin/bash
 
 # Exit immediately if a command exits with a non-zero status
 set -e
-
-# Function to print a message with a timestamp
-log() {
-  echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"
-}
-
-log "Deleting existing namespace: passbolt"
 kubectl delete namespace passbolt || log "Namespace passbolt does not exist, continuing..."
-
-log "Recreating secrets for database and SMTP"
 kubectl create namespace passbolt
 kubectl create secret generic passbolt-db -n passbolt \
   --from-literal=DATASOURCES_DEFAULT_PASSWORD=<password_string> \
   --from-literal=MARIADB_ROOT_PASSWORD=<password_string>
-
 kubectl create secret generic fastmail-smtp -n passbolt \
   --from-literal=EMAIL_TRANSPORT_DEFAULT_PASSWORD=<password_string>
-
-log "Installing Passbolt with Helm"
-helm install passbolt passbolt/passbolt -f values.yaml -n passbolt --post-renderer ./inject-nodeport.py -n passbolt --set service.ports.https.nodePort=30443 --set service.ports.http.nodePort=30080
-
-log "Retrieving pod information"
+helm install passbolt passbolt/passbolt -f values.yaml -n passbolt --post-renderer ./inject-nodeport.py -n passbolt
 kubectl get pods -n passbolt
-
-log "Script execution completed!"
+```
