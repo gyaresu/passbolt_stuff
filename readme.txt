@@ -1,3 +1,6 @@
+Test repo for playing with Docker/k8s Passbolt installs.
+
+Docker very straight forward.
 I've installed docker, docker-compose, helm and colima via Homebrew
 
 Note that `docker compose` is v2 and brew uses v1 of `docker-compose`
@@ -22,7 +25,37 @@ kubectl exec -it passbolt-69bcfd8fc8-h57rw -n passbolt -- su -c "bin/cake passbo
 
 Docker image: https://hub.docker.com/r/passbolt/passbolt/
 
-Removing app password for Fastmail:
+Creating k8s app secret instead of password for Fastmail:
 kubectl create secret generic fastmail-smtp \
   -n passbolt \
   --from-literal=EMAIL_TRANSPORT_DEFAULT_PASSWORD=<app_password>
+
+#!/bin/bash
+
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+# Function to print a message with a timestamp
+log() {
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"
+}
+
+log "Deleting existing namespace: passbolt"
+kubectl delete namespace passbolt || log "Namespace passbolt does not exist, continuing..."
+
+log "Recreating secrets for database and SMTP"
+kubectl create namespace passbolt
+kubectl create secret generic passbolt-db -n passbolt \
+  --from-literal=DATASOURCES_DEFAULT_PASSWORD=<password_string> \
+  --from-literal=MARIADB_ROOT_PASSWORD=<password_string>
+
+kubectl create secret generic fastmail-smtp -n passbolt \
+  --from-literal=EMAIL_TRANSPORT_DEFAULT_PASSWORD=<password_string>
+
+log "Installing Passbolt with Helm"
+helm install passbolt passbolt/passbolt -f values.yaml -n passbolt --post-renderer ./inject-nodeport.py -n passbolt --set service.ports.https.nodePort=30443 --set service.ports.http.nodePort=30080
+
+log "Retrieving pod information"
+kubectl get pods -n passbolt
+
+log "Script execution completed!"
