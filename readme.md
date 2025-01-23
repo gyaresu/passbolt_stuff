@@ -18,11 +18,14 @@ leaving the pythong injection below for learning reasons but just figured out al
 [k9s](https://k9scli.io) is a great tool for easy viz and management of the k8s cluster and that's where I noticed the port forwarding optons.
 Isn't learning fun?!
 
-pip     24.3.1
-PyYAML  6.0.2
+|Package | Version |
+| --- | --- |
+|pip | 24.3.1 |
+|PyYAML | 6.0.2 |
 
 ```python3 -m venv
-pip3 install pyyaml```
+pip3 install pyyaml
+```
 
 https://www.passbolt.com/docs/hosting/install/ce/helm-chart/
 https://www.passbolt.com/docs/hosting/configure/https/ce/docker-manual/
