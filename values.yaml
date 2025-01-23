@@ -39,7 +39,7 @@ app:
 
 passboltEnv:
   plain:
-    APP_FULL_BASE_URL: https://passbolt.local:30433
+    APP_FULL_BASE_URL: https://passbolt.local:30443
     PASSBOLT_SSL_FORCE: true
     PASSBOLT_REGISTRATION_PUBLIC: true
     CACHE_CAKE_DEFAULT_SERVER: passbolt-redis-master
@@ -52,8 +52,8 @@ passboltEnv:
     CACHE_CAKE_DEFAULT_PASSWORD: "P4ssR3dis"
 
 # # Custom NodePort service injected at helm install by inject-nodeport.yaml
-service:
-  type: NodePort
+# service:
+#   type: NodePort
 
 ## Optional Persistence Configuration
 persistence:
