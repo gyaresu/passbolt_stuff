@@ -23,7 +23,8 @@ Isn't learning fun?!
 |pip | 24.3.1 |
 |PyYAML | 6.0.2 |
 
-```python3 -m venv
+```
+python3 -m venv
 pip3 install pyyaml
 ```
 
