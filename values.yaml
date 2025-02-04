@@ -48,7 +48,7 @@ passboltEnv:
     DATASOURCES_DEFAULT_PASSWORD: ref:passbolt-db:DATASOURCES_DEFAULT_PASSWORD
     EMAIL_TRANSPORT_DEFAULT_USERNAME: ref:passbolt-smtp:EMAIL_TRANSPORT_DEFAULT_USERNAME # SMTP username
     EMAIL_TRANSPORT_DEFAULT_PASSWORD: ref:fastmail-smtp:EMAIL_TRANSPORT_DEFAULT_PASSWORD
-    PASSBOLT_GPG_SERVER_KEY_FINGERPRINT: "your_gpg_fingerprint"
+    #PASSBOLT_GPG_SERVER_KEY_FINGERPRINT: "your_gpg_fingerprint"
     CACHE_CAKE_DEFAULT_PASSWORD: "P4ssR3dis"
 
 # # Custom NodePort service injected at helm install by inject-nodeport.yaml

@@ -1,3 +1,4 @@
 notes.txt
 reset-k8s.sh
 venv
+.env

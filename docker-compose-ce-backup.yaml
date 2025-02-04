@@ -2,13 +2,11 @@ services:
   db:
     image: mariadb:10.11
     restart: unless-stopped
-    env_file:
-      - .env
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: "true"
       MYSQL_DATABASE: "passbolt"
       MYSQL_USER: "passbolt"
-      MYSQL_PASSWORD: ${DATASOURCES_DEFAULT_PASSWORD}
+      MYSQL_PASSWORD: "P4ssb0lt"
     volumes:
       - database_volume:/var/lib/mysql
 
@@ -19,21 +17,12 @@ services:
     restart: unless-stopped
     depends_on:
       - db
-    env_file:
-      - .env
     environment:
       APP_FULL_BASE_URL: https://passbolt.local
       DATASOURCES_DEFAULT_HOST: "db"
       DATASOURCES_DEFAULT_USERNAME: "passbolt"
-      DATASOURCES_DEFAULT_PASSWORD: ${DATASOURCES_DEFAULT_PASSWORD}
+      DATASOURCES_DEFAULT_PASSWORD: "P4ssb0lt"
       DATASOURCES_DEFAULT_DATABASE: "passbolt"
-      EMAIL_TRANSPORT_DEFAULT_HOST: "smtp.fastmail.com"
-      #EMAIL_TRANSPORT_DEFAULT_PORT: 465
-      EMAIL_TRANSPORT_DEFAULT_PORT: 587
-      EMAIL_TRANSPORT_DEFAULT_USERNAME: "tallgareth@fea.st"
-      EMAIL_TRANSPORT_DEFAULT_PASSWORD: ${EMAIL_TRANSPORT_DEFAULT_PASSWORD}
-      EMAIL_TRANSPORT_DEFAULT_TLS: "true"
-      EMAIL_DEFAULT_FROM: "tallgareth@fea.st"
     volumes:
       - gpg_volume:/etc/passbolt/gpg
       - jwt_volume:/etc/passbolt/jwt

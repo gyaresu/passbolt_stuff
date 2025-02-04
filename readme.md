@@ -69,3 +69,6 @@ kubectl create secret generic fastmail-smtp -n passbolt \
 helm install passbolt passbolt/passbolt -f values.yaml -n passbolt # (no longer required) --post-renderer ./inject-nodeport.py -n passbolt
 kubectl get pods -n passbolt
 ```
+---
+
+
